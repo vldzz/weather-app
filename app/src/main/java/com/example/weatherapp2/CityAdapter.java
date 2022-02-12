@@ -8,6 +8,9 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
+
+import lombok.SneakyThrows;
 
 public class CityAdapter extends BaseAdapter {
     private Context context;
@@ -37,6 +40,7 @@ public class CityAdapter extends BaseAdapter {
     }
 
 
+    @SneakyThrows
     @Override
     public View getView(int i, View convertView, ViewGroup viewGroup) {
         View view = convertView;
@@ -49,7 +53,11 @@ public class CityAdapter extends BaseAdapter {
 
         CityFragment cityFragment = getCity(i);
 
-        cityView.setText(cityFragment.getCityName());
+        if (cityFragment == null) {
+            cityView.setText("Unknown");
+        } else {
+            cityView.setText(cityFragment.getCityName());
+        }
 
         return view;
     }

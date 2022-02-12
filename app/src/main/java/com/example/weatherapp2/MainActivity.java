@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -117,10 +116,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchWeather(String city) {
-        Call<WeatherEntity> call = iWeatherAPI.getWeather(city, "metric", "247c2eb84b5fba896cd642227be36b8b", "en");
+        Call<WeatherEntity> call = iWeatherAPI.getWeather(city, "metric", Configs.API_TOKEN, "en");
 
         AppCompatActivity appCompatActivity = this;
-
         call.enqueue(new Callback<WeatherEntity>() {
             @Override
             public void onResponse(Call<WeatherEntity> call, Response<WeatherEntity> response) {
@@ -173,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void search(View view) {
         cityList.add(new CityFragment("Balti"));
-        cityList.add(new CityFragment("Ungheni"));
-        cityList.add(new CityFragment("Drochia"));
-        cityList.add(new CityFragment("Soroca"));
+        cityList.add(new CityFragment( "Ungheni"));
+        cityList.add(new CityFragment( "Drochia"));
+        cityList.add(new CityFragment( "Soroca"));
 
         cityAdapter.notifyDataSetChanged();
         FileShare.saveCitiesToDisk(cityList);
