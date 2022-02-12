@@ -19,6 +19,7 @@ import com.jkb.slidemenu.SlideMenuLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 
+import lombok.SneakyThrows;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -60,8 +61,8 @@ public class MainActivity extends AppCompatActivity {
         iWeatherAPI = WeatherAPI.getClient().create(IWeatherAPI.class);
         fetchWeather("Orhei");
 
-        readSavedCitiesFromDisk();
         setupCityAdapter();
+        readSavedCitiesFromDisk();
 
     }
 
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void setupCityAdapter() {
-        cityAdapter = new CityAdapter(this, cityList);
+        cityAdapter = new CityAdapter(this, R.layout.city_layout, cityList);
         cities.setAdapter(cityAdapter);
 
         cities.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -84,15 +85,20 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long duration) {
 
                 CityFragment clickedCity = (CityFragment) adapterView.getItemAtPosition(pos);
-//                Debug.error(this, clickedCity.getCityName());
-                fetchWeather(clickedCity.getCityName());
+                try {
+                    setWeather(clickedCity.getWeatherEntity());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
 
 
     private void readSavedCitiesFromDisk() {
-        cityList.addAll(FileShare.readSavedCitiesFromDisk());
+        for (CityFragment cityFragment : FileShare.readSavedCitiesFromDisk()) {
+            fetchListItemWeather(cityFragment);
+        }
     }
 
     private void initElements() {
@@ -139,6 +145,48 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void fetchListItemWeather(CityFragment cityFragment) {
+        Call<WeatherEntity> call = iWeatherAPI.getWeather(cityFragment.getCityName(), "metric", Configs.API_TOKEN, "en");
+
+        AppCompatActivity appCompatActivity = this;
+        call.enqueue(new Callback<WeatherEntity>() {
+            @Override
+            public void onResponse(Call<WeatherEntity> call, Response<WeatherEntity> response) {
+                cityFragment.setWeatherEntity(response.body());
+                patchListViewData(cityFragment);
+            }
+
+            @Override
+            public void onFailure(Call<WeatherEntity> call, Throwable t) {
+                Debug.error(appCompatActivity, "Failed to fetch :(");
+            }
+        });
+
+    }
+
+
+    public void patchListViewData(CityFragment item) {
+        ArrayList<CityFragment> cityFragments = new ArrayList<>();
+        boolean added = false;
+
+        for (int i = 0; i < cityAdapter.getCount(); i++) {
+            if (cityAdapter.getItem(i).getCityName().equals(item.getCityName())) {
+                cityFragments.add(item);
+                added = true;
+            } else {
+                cityFragments.add(cityAdapter.getItem(i));
+            }
+        }
+
+        if (!added) {
+            cityFragments.add(item);
+        }
+
+        cityAdapter.clear();
+        cityAdapter.addAll(cityFragments);
+        cityAdapter.notifyDataSetChanged();
+    }
+
     private void setWeather(WeatherEntity weather) throws ParseException {
 //        Debug.error(this, weather.toString());
         tempView.setText(weather.getTempStr());
@@ -170,13 +218,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void search(View view) {
-        cityList.add(new CityFragment("Balti"));
-        cityList.add(new CityFragment( "Ungheni"));
-        cityList.add(new CityFragment( "Drochia"));
-        cityList.add(new CityFragment( "Soroca"));
+        fetchListItemWeather(new CityFragment("Balti"));
+        fetchListItemWeather(new CityFragment("Ungheni"));
+        fetchListItemWeather(new CityFragment("Drochia"));
+    }
 
-        cityAdapter.notifyDataSetChanged();
-        FileShare.saveCitiesToDisk(cityList);
+    public void updateListViewData(ArrayList<CityFragment> arrayList) {
+        cityAdapter.clear();
+        cityAdapter.addAll(arrayList);
     }
 
     public void onCityItemClicked(View view) {
