@@ -54,7 +54,8 @@
 
         android:dividerHeight="10dp"
         android:footerDividersEnabled="false"
-        android:headerDividersEnabled="false">
+        android:headerDividersEnabled="false"
+        android:layout_margin="10dp">
 
 
     </ListView>

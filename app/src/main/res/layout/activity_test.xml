@@ -38,7 +38,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:src="@drawable/ic_launcher_background" />
+                    android:src="@drawable/weather_app" />
 
                 <TextView
                     android:id="@+id/title_name"
@@ -58,7 +58,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:src="@drawable/ic_launcher_background" />
+                    android:src="@drawable/weather_app" />
             </RelativeLayout>
 
 
